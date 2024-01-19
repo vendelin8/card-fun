@@ -1,0 +1,42 @@
+version: "3.8"
+
+volumes:
+  redis:
+
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.5.0.0/16
+         gateway: 10.5.0.1
+
+services:
+  redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      vpcbr:
+        ipv4_address: "10.5.0.5"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes: 
+      - redis:/data
+
+  backend:
+    image: card-fun
+    container_name: card-fun
+    environment:
+      - REDIS_URL=10.5.0.5:6379
+    ports:
+      - "3000:3000"
+    networks:
+      vpcbr:
+        ipv4_address: "10.5.0.6"
+    expose:
+      - "3000"
+    depends_on:
+      - redis
+    volumes:
+      - ${GOPATH}:/go
+      - ${GOPATH}/src/github.com/vendelin8/card-fun/out:/app/out
+    command: go-task test

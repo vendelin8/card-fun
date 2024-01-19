@@ -1,0 +1,6 @@
+.bin
+out
+cov.html
+coverage.out
+.gitignore
+docker

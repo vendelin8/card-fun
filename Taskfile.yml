@@ -60,3 +60,22 @@ tasks:
   cover:
     cmds:
       - go tool cover -o=cov.html -html=coverage.out; sed -i 's/black/whitesmoke/g' cov.html; chromium cov.html
+
+  docker-build:
+    cmds:
+      - DOCKER_BUILDKIT=1 docker build -t card-fun -f docker/Dockerfile .
+
+  docker-run:
+    deps: [docker-build]
+    cmds:
+      - docker-compose -f docker/docker-compose.yaml up
+
+  dev:
+    deps: [docker-build]
+    cmds:
+      - GOPATH=$GOPATH docker-compose -f docker/docker-compose-dev.yaml up
+
+  docker-test:
+    deps: [docker-build]
+    cmds:
+      - GOPATH=$GOPATH docker-compose -f docker/docker-compose-test.yaml up --abort-on-container-exit --exit-code-from backend

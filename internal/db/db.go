@@ -3,10 +3,25 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/vendelin8/card-fun/pkg/deck"
 )
+
+var (
+	ErrMissingDeck = errors.New("This deck cannot be found")
+	ErrMaxRetries  = errors.New("Reached maximum number of retries")
+)
+
+type ErrDeckLen struct {
+	Remaining int
+	Requested int
+}
+
+func (e ErrDeckLen) Error() string {
+	return fmt.Sprintf("Deck has less (%d) cards then requested (%d)", e.Remaining, e.Requested)
+}
 
 // StoreDeck stores the given cards in a new deck.
 func StoreDeck(ctx context.Context, d *deck.Deck) error {

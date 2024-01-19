@@ -4,6 +4,7 @@ package deck
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 var ErrDuplCard = errors.New("Duplicate card found in input cards")
@@ -61,8 +62,17 @@ type Deck struct {
 	Cards []map[string]string `json:"cards,omitempty"`
 }
 
-func (d *Deck) New() error {
+// CheckDuplicates checks if a given list of card codes contain dulicates.
+func CheckDuplicates(reqCodes []string) error {
+	m := map[string]struct{}{}
+	s := struct{}{}
+	for i, c := range reqCodes {
+		c = strings.TrimSpace(c)
+		if _, ok := m[c]; ok {
+			return ErrDuplCard
+		}
+		m[c] = s
+		reqCodes[i] = c
+	}
 	return nil
 }
-
-func (d *Deck) Resolve() {}

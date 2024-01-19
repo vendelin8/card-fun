@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/vendelin8/card-fun/internal/db"
 	"github.com/vendelin8/card-fun/pkg/deck"
+	"github.com/vendelin8/card-fun/pkg/deck/french52"
 	"github.com/vendelin8/card-fun/pkg/util"
 )
 
@@ -29,7 +30,7 @@ func CreateHandler(c *fiber.Ctx) error {
 	if !ok {
 		return nil
 	}
-	d := &deck.Deck{}
+	d := &french52.French52{}
 	d.Shuffled = shuffled
 	d.Codes = util.SplitStr(c.Query("cards", ""))
 	if !util.CheckErr(c, d.New()) {
@@ -37,7 +38,7 @@ func CreateHandler(c *fiber.Ctx) error {
 	}
 	ctx, cancel := util.CtxTimeout()
 	defer cancel()
-	if ok = util.CheckErr(c, db.StoreDeck(ctx, d)); !ok {
+	if ok = util.CheckErr(c, db.StoreDeck(ctx, (*deck.Deck)(d))); !ok {
 		return nil
 	}
 	return c.JSON(d.Details)
@@ -53,11 +54,11 @@ func CreateHandler(c *fiber.Ctx) error {
 // @Success 200 {object} string
 // @Router /open [get]
 func OpenHandler(c *fiber.Ctx) error {
-	d := &deck.Deck{}
+	d := &french52.French52{}
 	d.ID = c.Query("deck_id")
 	ctx, cancel := util.CtxTimeout()
 	defer cancel()
-	if !util.CheckErr(c, db.All(ctx, d)) {
+	if !util.CheckErr(c, db.All(ctx, (*deck.Deck)(d))) {
 		return nil
 	}
 	d.Resolve()
@@ -75,7 +76,7 @@ func OpenHandler(c *fiber.Ctx) error {
 // @Success 200 {object} string
 // @Router /draw [post]
 func DrawHandler(c *fiber.Ctx) error {
-	d := &deck.Deck{}
+	d := &french52.French52{}
 	d.ID = c.Query("deck_id")
 	n, ok := util.ParsePosInt(c, c.Query("count", "1"), "count")
 	if !ok {
@@ -83,7 +84,7 @@ func DrawHandler(c *fiber.Ctx) error {
 	}
 	ctx, cancel := util.CtxTimeout()
 	defer cancel()
-	if !util.CheckErr(c, db.Draw(ctx, d, n)) {
+	if !util.CheckErr(c, db.Draw(ctx, (*deck.Deck)(d), n)) {
 		return nil
 	}
 	d.Resolve()

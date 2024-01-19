@@ -2,9 +2,9 @@
 package api
 
 import (
-	"fmt"
-
 	"github.com/gofiber/fiber/v2"
+	"github.com/vendelin8/card-fun/internal/db"
+	"github.com/vendelin8/card-fun/pkg/deck"
 	"github.com/vendelin8/card-fun/pkg/util"
 )
 
@@ -29,10 +29,18 @@ func CreateHandler(c *fiber.Ctx) error {
 	if !ok {
 		return nil
 	}
-	codes := util.SplitStr(c.Query("cards", ""))
-	fmt.Println("create", shuffled, codes) // TODO: implement
-	c.WriteString("OK")
-	return nil
+	d := &deck.Deck{}
+	d.Shuffled = shuffled
+	d.Codes = util.SplitStr(c.Query("cards", ""))
+	if !util.CheckErr(c, d.New()) {
+		return nil
+	}
+	ctx, cancel := util.CtxTimeout()
+	defer cancel()
+	if ok = util.CheckErr(c, db.StoreDeck(ctx, d)); !ok {
+		return nil
+	}
+	return c.JSON(d.Details)
 }
 
 // OpenHandler opens a deck.
@@ -45,10 +53,15 @@ func CreateHandler(c *fiber.Ctx) error {
 // @Success 200 {object} string
 // @Router /open [get]
 func OpenHandler(c *fiber.Ctx) error {
-	deckID := c.Query("deck_id")
-	fmt.Println("open", deckID) // TODO: implement
-	c.WriteString("OK")
-	return nil
+	d := &deck.Deck{}
+	d.ID = c.Query("deck_id")
+	ctx, cancel := util.CtxTimeout()
+	defer cancel()
+	if !util.CheckErr(c, db.All(ctx, d)) {
+		return nil
+	}
+	d.Resolve()
+	return c.JSON(d)
 }
 
 // DrawHandler draws some cards from a deck.
@@ -62,12 +75,17 @@ func OpenHandler(c *fiber.Ctx) error {
 // @Success 200 {object} string
 // @Router /draw [post]
 func DrawHandler(c *fiber.Ctx) error {
-	deckID := c.Query("deck_id")
-	count, ok := util.ParsePosInt(c, c.Query("count", "1"), "count")
+	d := &deck.Deck{}
+	d.ID = c.Query("deck_id")
+	n, ok := util.ParsePosInt(c, c.Query("count", "1"), "count")
 	if !ok {
 		return nil
 	}
-	fmt.Println("draw", deckID, count) // TODO: implement
-	c.WriteString("OK")
-	return nil
+	ctx, cancel := util.CtxTimeout()
+	defer cancel()
+	if !util.CheckErr(c, db.Draw(ctx, d, n)) {
+		return nil
+	}
+	d.Resolve()
+	return c.JSON(map[string]interface{}{"cards": d.Cards})
 }

@@ -1,0 +1,79 @@
+basePath: /v1
+info:
+  contact: {}
+  description: This is a card deck simulator server demo.
+  termsOfService: http://swagger.io/terms/
+  title: Card Fun Demo
+  version: "1.0"
+paths:
+  /create:
+    put:
+      consumes:
+      - '*/*'
+      description: new full deck, or one based on a given set of cards, maybe shuffled.
+      parameters:
+      - description: if new deck needs to be shuffled
+        in: query
+        name: shuffled
+        type: boolean
+      - description: komma separated list of card codes to init deck with
+        in: query
+        name: cards
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Creates a new deck.
+      tags:
+      - deck
+  /draw:
+    post:
+      consumes:
+      - '*/*'
+      description: Pops one or multiple cards from the top of a given deck.
+      parameters:
+      - description: identifier of the deck about to draw cards from
+        in: query
+        name: deck_id
+        required: true
+        type: string
+      - description: number of cards to draw from the deck
+        in: query
+        name: count
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Draws some cards from a deck.
+      tags:
+      - cards
+  /open:
+    get:
+      consumes:
+      - '*/*'
+      description: returns current content of a deck.
+      parameters:
+      - description: identifier of the deck about to open
+        in: query
+        name: deck_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Opens a deck.
+      tags:
+      - deck
+swagger: "2.0"

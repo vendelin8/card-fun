@@ -1,0 +1,120 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a card deck simulator server demo.",
+        "title": "Card Fun Demo",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/v1",
+    "paths": {
+        "/create": {
+            "put": {
+                "description": "new full deck, or one based on a given set of cards, maybe shuffled.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deck"
+                ],
+                "summary": "Creates a new deck.",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "if new deck needs to be shuffled",
+                        "name": "shuffled",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "komma separated list of card codes to init deck with",
+                        "name": "cards",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/draw": {
+            "post": {
+                "description": "Pops one or multiple cards from the top of a given deck.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Draws some cards from a deck.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifier of the deck about to draw cards from",
+                        "name": "deck_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "number of cards to draw from the deck",
+                        "name": "count",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/open": {
+            "get": {
+                "description": "returns current content of a deck.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deck"
+                ],
+                "summary": "Opens a deck.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "identifier of the deck about to open",
+                        "name": "deck_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

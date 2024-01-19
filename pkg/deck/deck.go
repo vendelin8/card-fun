@@ -1,6 +1,41 @@
 // Package deck contains base deck related structures and functions.
 package deck
 
+import (
+	"errors"
+	"fmt"
+)
+
+var ErrDuplCard = errors.New("Duplicate card found in input cards")
+
+// ErrCardCodeLen is an error that shows a given card code with wrong len other than 2.
+type ErrCardCodeLen struct {
+	code    string
+	wantLen int
+}
+
+func NewErrCardCodeLen(c string, e int) ErrCardCodeLen {
+	return ErrCardCodeLen{code: c, wantLen: e}
+}
+
+func (e ErrCardCodeLen) Error() string {
+	return fmt.Sprintf("Card code must be exactly %d caracters, but '%s' fails", e.wantLen, e.code)
+}
+
+// ErrCardCodeMiss is an error that shows a given card code is invalid because suit or
+// value character is not matching the available cards of the deck.
+type ErrCardCodeMiss struct {
+	code string
+}
+
+func NewErrCardCodeMiss(c string) ErrCardCodeMiss {
+	return ErrCardCodeMiss{code: c}
+}
+
+func (e ErrCardCodeMiss) Error() string {
+	return fmt.Sprintf("Card code '%s' is NOT valid", e.code)
+}
+
 // DeckType is a blueprint for deck types and their possible actions.
 type DeckType interface {
 	New() error
